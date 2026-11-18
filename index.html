@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JoGyuHwanv@home:~</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Noto+Sans+KR:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 장난기 있는 개발자의 작업실 — 짧고 건조한 말투, 프롬프트처럼 말한다
+   IDEA: 사이트 전체가 하나의 셸 세션. 섹션은 디렉터리, 글은 파일
+   PICTURE: 첫 화면의 진짜로 입력되는 터미널 창 (help, ls, cd, open, cat)
+   COLOUR and TYPE: 숯빛 바탕 + 형광 초록 프롬프트, 시안 디렉터리, 마젠타 하이라이트 / JetBrains Mono + Noto Sans KR
+   LAYOUT: 상단 셸 바 → 터미널 히어로 → about(neofetch) → projects(ls -l) → games → notes(grep) → footer */
+:root{color-scheme:light dark;
+  --bg:light-dark(#eceee6,#0d110e);--panel:light-dark(#fafbf6,#141a16);--line:light-dark(#c7cdbd,#253029);
+  --ink:light-dark(#17201a,#d5e1d1);--dim:light-dark(#566352,#7e8f7a);
+  --g:light-dark(#0c7a3a,#6ef59a);--c:light-dark(#09688c,#72d0ff);--p:light-dark(#ad2276,#ff7ac6);
+  --term:#0a0e0b;--tink:#d5e1d1;--tg:#6ef59a;--tc:#72d0ff;--tp:#ff7ac6;--tdim:#6f806c}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "JetBrains Mono","Noto Sans KR",ui-monospace,monospace;overflow-x:clip}
+a{color:var(--c)}
+.band{padding:clamp(28px,4vw,64px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+pre,.scroll{overflow-x:auto}code{overflow-wrap:anywhere}
+
+/* top bar */
+.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:16px;padding:10px max(5vw,16px);flex-wrap:wrap}
+.host{font-weight:800;white-space:nowrap}.host b{color:var(--g)}.host i{font-style:normal;color:var(--c)}
+.nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.nav a{color:var(--ink);text-decoration:none;padding:10px 12px;border-radius:6px;font-size:14px;min-height:44px;display:inline-flex;align-items:center}
+.nav a::before{content:"cd ";color:var(--dim)}
+.nav a:hover,.nav a:focus-visible{background:var(--panel);outline:1px solid var(--line)}
+
+/* hero terminal */
+.hero{padding-top:clamp(24px,3vw,40px)}
+.hero h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 6px;text-wrap:balance;font-family:"JetBrains Mono","Noto Sans KR",monospace}
+.hero h1 span{color:var(--g)}
+.hero p.lead{margin:0 0 22px;color:var(--dim);max-width:62ch}
+.win{background:var(--term);color:var(--tink);border-radius:12px;box-shadow:0 1px 0 #ffffff14 inset,0 24px 60px -24px #000a,0 0 0 1px #000;overflow:hidden}
+.win .top{display:flex;align-items:center;gap:8px;padding:10px 14px;background:linear-gradient(#1b221d,#131915);border-bottom:1px solid #000}
+.dot{width:12px;height:12px;border-radius:50%;background:#ff5f57}.dot:nth-child(2){background:#febc2e}.dot:nth-child(3){background:#28c840}
+.win .top em{font-style:normal;color:var(--tdim);font-size:13px;margin:0 auto;padding-right:52px}
+.screen{height:clamp(320px,46vh,440px);overflow-y:auto;padding:16px 18px;font-size:15px;line-height:1.55;cursor:text;
+  background:radial-gradient(120% 80% at 50% 0%,#12201799,transparent 70%),repeating-linear-gradient(#ffffff03 0 1px,transparent 1px 3px)}
+.screen .ln{white-space:pre-wrap;word-break:break-word}
+.pr{color:var(--tg)}.pr i{font-style:normal;color:var(--tc)}
+.screen a{color:var(--tc)}.t-d{color:var(--tc);font-weight:600}.t-p{color:var(--tp)}.t-dim{color:var(--tdim)}.t-g{color:var(--tg)}
+.inrow{display:flex;gap:8px;align-items:baseline}
+.inrow input{flex:1;background:transparent;border:0;color:var(--tink);font:inherit;font-size:16px;outline:none;caret-color:var(--tg);padding:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chips button{font:inherit;font-size:14px;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.chips button::before{content:"$ ";color:var(--g)}
+.chips button:hover,.chips button:focus-visible{border-color:var(--g);outline:none}
+
+/* sections */
+.sec h2{font-size:clamp(28px,4vw,40px);line-height:1.05;margin:4px 0 20px}
+.cmd{color:var(--dim);font-size:14px}.cmd b{color:var(--g);font-weight:400}
+.note-s{font-size:13px;color:var(--dim);margin:-8px 0 18px}
+
+/* about / neofetch */
+.fetch{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(18px,4vw,48px);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:clamp(18px,3vw,32px);align-items:center}
+.fetch pre{margin:0;color:var(--g);font-size:clamp(10px,1.6vw,15px);line-height:1.15;font-weight:800}
+.kv{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:4px 12px;margin:0}
+.kv dt{color:var(--c);font-weight:600}.kv dd{margin:0}
+.kv h3{grid-column:1/-1;margin:0 0 6px;font-size:20px}.kv h3 b{color:var(--g)}
+.sw{display:flex;gap:0;margin-top:14px;grid-column:1/-1}.sw i{width:28px;height:16px}
+
+/* projects ls -l */
+.ls{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+.row{display:grid;grid-template-columns:7.5em 6.5em minmax(0,1fr) auto;gap:16px;align-items:center;padding:16px 18px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .perm{color:var(--dim);font-size:13px;white-space:nowrap}.row time{color:var(--dim);font-size:13px;white-space:nowrap}
+.row h3{margin:0;font-size:17px;color:var(--c)}.row p{margin:2px 0 6px;font-family:"Noto Sans KR",sans-serif;font-size:15px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}.tags span{font-size:12px;color:var(--p);border:1px solid color-mix(in srgb,var(--p) 40%,transparent);border-radius:4px;padding:1px 6px}
+.go{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--g);color:var(--g);text-decoration:none;font-size:14px;white-space:nowrap}
+.go:hover,.go:focus-visible{background:var(--g);color:var(--bg);outline:none}
+.live{color:var(--g)}.wip{color:var(--p)}
+
+/* games */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.thumb{height:140px;position:relative;background:var(--term);display:grid;place-items:center;overflow:hidden}
+.thumb svg{width:100%;height:100%}
+.card .body{padding:16px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card h3{margin:0;font-size:18px}.card p{margin:0;font-family:"Noto Sans KR",sans-serif;font-size:15px;flex:1}
+.meta{font-size:13px;color:var(--dim)}
+
+/* notes */
+.grep{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:0 14px;margin-bottom:16px;max-width:560px}
+.grep label{color:var(--g);white-space:nowrap}
+.grep input{flex:1;font:inherit;font-size:16px;border:0;background:transparent;color:var(--ink);min-height:48px;outline:none}
+.grep:focus-within{border-color:var(--g)}
+.notes{display:flex;flex-direction:column;gap:10px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+summary{cursor:pointer;list-style:none;display:grid;grid-template-columns:6.5em minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 18px;min-height:52px}
+summary::-webkit-details-marker{display:none}
+summary time{color:var(--dim);font-size:13px;white-space:nowrap}
+summary strong{font-family:"Noto Sans KR",sans-serif;font-weight:600}
+summary::after{content:"cat ▸";color:var(--g);font-size:13px;white-space:nowrap}
+details[open] summary::after{content:"close ▾"}
+summary:focus-visible{outline:2px solid var(--g);border-radius:10px}
+.nb{padding:0 18px 18px;font-family:"Noto Sans KR",sans-serif;max-width:72ch}
+.nb p{margin:.6em 0}.nb code{font-family:"JetBrains Mono",monospace;background:var(--bg);padding:1px 5px;border-radius:4px;font-size:14px}
+.empty{color:var(--dim);padding:18px;border:1px dashed var(--line);border-radius:10px}
+
+footer{border-top:1px solid var(--line);color:var(--dim);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+@media(max-width:760px){
+  .row{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}
+  .row .perm{display:none}.row time{grid-column:1/-1;order:-1}
+}
+@media(max-width:600px){
+  .fetch{grid-template-columns:1fr}.kv{grid-template-columns:6em minmax(0,1fr)}
+  .nav{margin-left:0}.nav a{padding:8px 10px;font-size:13px}
+  summary{grid-template-columns:minmax(0,1fr) auto}summary time{grid-column:1/-1}
+  .win .top em{padding-right:0}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="bar"><div class="wrap">
+  <div class="host"><b>JoGyuHwanv</b>@home:<i>~</i>$</div>
+  <nav class="nav" aria-label="섹션">
+    <a href="#about">about</a><a href="#projects">projects</a><a href="#games">games</a><a href="#notes">notes</a>
+  </nav>
+</div></header>
+
+<main>
+<section class="band hero"><div class="wrap">
+  <h1>안녕하세요, <span id="hName">규환</span>입니다_</h1>
+  <p class="lead" id="hLead">만들고, 배포하고, 기록합니다. 아래 터미널에 직접 명령어를 입력해 보세요.</p>
+  <div class="win" role="region" aria-label="인터랙티브 터미널">
+    <div class="top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><em>JoGyuHwanv@home: ~ — zsh</em></div>
+    <div class="screen" id="screen">
+      <div id="log"></div>
+      <div class="inrow"><span class="pr" id="ps">JoGyuHwanv@home:<i>~</i>$</span><input id="cin" autocomplete="off" spellcheck="false" aria-label="명령어 입력"></div>
+    </div>
+  </div>
+  <div class="chips" id="chips">
+    <button data-c="help">help</button><button data-c="ls">ls</button><button data-c="ls projects">ls projects</button><button data-c="ls games">ls games</button><button data-c="whoami">whoami</button>
+  </div>
+</div></section>
+
+<section class="band sec" id="about"><div class="wrap">
+  <div class="cmd"><b>$</b> neofetch</div>
+  <h2>~/about</h2>
+  <div class="fetch">
+<pre aria-hidden="true">  ▄▄▄▄▄▄▄▄▄▄▄▄
+ █ ▌          █
+ █  ▀▄  ▄▄▄▄  █
+ █  ▄▀        █
+ █            █
+  ▀▀▀▀▀▀▀▀▀▀▀▀
+     ▄▄████▄▄</pre>
+    <dl class="kv" id="kv"></dl>
+  </div>
+</div></section>
+
+<section class="band sec" id="projects"><div class="wrap">
+  <div class="cmd"><b>$</b> ls -l ~/projects</div>
+  <h2>~/projects</h2>
+  <p class="note-s">아래 프로젝트·게임·글은 아직 예시예요. 곧 실제 내용으로 채워집니다.</p>
+  <div class="ls" id="pList"></div>
+</div></section>
+
+<section class="band sec" id="games"><div class="wrap">
+  <div class="cmd"><b>$</b> ls ~/games --made-by-me</div>
+  <h2>~/games</h2>
+  <div class="grid" id="gList"></div>
+</div></section>
+
+<section class="band sec" id="notes"><div class="wrap">
+  <div class="cmd"><b>$</b> cat ~/notes/*.md</div>
+  <h2>~/notes</h2>
+  <div class="grep"><label for="q">grep -i</label><input id="q" placeholder="제목·태그·내용 검색"></div>
+  <div class="notes" id="nList"></div>
+</div></section>
+</main>
+
+<footer class="band"><div class="wrap">
+  <span id="fCopy">© 2026 JoGyuHwanv</span>
+  <span>$ exit 0 — 방문해 주셔서 고마워요</span>
+</div></footer>
+
+<script>
+{
+/* ===== 여기 내용만 바꾸면 사이트 전체가 바뀌어요 ===== */
+const ME={name:'규환',handle:'JoGyuHwanv',role:'웹을 만들고 작은 게임을 만드는 사람',loc:'Seoul, KR',
+  stack:'HTML · CSS · JavaScript · Canvas',likes:'인디 게임, 키보드, 새벽 코딩',
+  github:'https://github.com/JoGyuHwanv',email:'rbghksdlsms@gmail.com'};
+
+const PROJECTS=[
+  {id:'todo-sky',name:'todo-sky',date:'2026-10-02',status:'live',desc:'하늘 색이 시간대에 따라 바뀌는 할 일 목록 앱',tags:['JavaScript','localStorage'],url:'https://example.com/todo-sky'},
+  {id:'lunch-roulette',name:'lunch-roulette',date:'2026-08-17',status:'live',desc:'점심 메뉴 못 고를 때 돌리는 룰렛. 친구들이 제일 많이 씀',tags:['HTML','CSS','애니메이션'],url:'https://example.com/lunch'},
+  {id:'weather-cli',name:'weather-cli',date:'2026-06-30',status:'live',desc:'터미널 감성으로 보는 날씨 웹 페이지',tags:['API','fetch'],url:'https://example.com/weather'},
+  {id:'pixel-diary',name:'pixel-diary',date:'2026-11-10',status:'wip',desc:'하루를 픽셀 한 칸 색으로 기록하는 일기장 (만드는 중)',tags:['Canvas','WIP'],url:'https://example.com/pixel-diary'}
+];
+
+const GAMES=[
+  {id:'snake-neo',name:'Snake Neo',genre:'아케이드',made:'Canvas · 2026.09',desc:'고전 뱀 게임에 대시 기능을 넣어 봤어요. 최고 기록 갱신에 도전!',url:'https://example.com/snake',hue:'#6ef59a'},
+  {id:'typing-dungeon',name:'Typing Dungeon',genre:'타자 RPG',made:'JavaScript · 2026.07',desc:'단어를 빨리 쳐서 몬스터를 물리치는 타자 연습 게임',url:'https://example.com/typing',hue:'#ff7ac6'},
+  {id:'block-drop',name:'Block Drop',genre:'퍼즐',made:'HTML/CSS · 2026.05',desc:'처음 만든 게임. 떨어지는 블록을 맞춰 줄을 지워요',url:'https://example.com/blocks',hue:'#72d0ff'}
+];
+
+const NOTES=[
+  {id:'github-pages',title:'GitHub Pages로 5분 만에 배포하기',date:'2026-11-12',tags:['배포','GitHub'],
+   body:['저장소를 만들고 <code>index.html</code>을 올린 뒤, Settings → Pages에서 브랜치를 main으로 고르면 끝.','주소는 <code>아이디.github.io/저장소이름</code> 형태가 돼요. 커스텀 도메인도 연결 가능!']},
+  {id:'canvas-loop',title:'Canvas 게임 루프 정리',date:'2026-10-21',tags:['게임','Canvas'],
+   body:['<code>requestAnimationFrame</code>으로 매 프레임 update → draw 순서로 호출.','프레임마다 걸린 시간(dt)을 곱해 줘야 컴퓨터 속도와 상관없이 같은 속도로 움직여요.']},
+  {id:'css-grid',title:'CSS Grid 자주 쓰는 패턴',date:'2026-09-03',tags:['CSS'],
+   body:['카드 목록: <code>repeat(auto-fill, minmax(280px, 1fr))</code> 한 줄이면 반응형 완성.','가운데 정렬은 <code>place-items: center</code>.']},
+  {id:'game-log',title:'이번 달 플레이한 게임 기록',date:'2026-11-01',tags:['게임','기록'],
+   body:['인디 로그라이크 2개 클리어, 하나는 엔딩까지 23시간.','다음에 만들 게임 아이디어: 리듬 + 타자 조합?']}
+];
+/* ================================================= */
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const host=u=>{try{return new URL(u).host+new URL(u).pathname.replace(/\/$/,'')}catch(e){return u}};
+
+/* render static sections */
+$('#hName').textContent=ME.name;
+$('#fCopy').textContent='© 2026 '+ME.handle;
+$('#kv').innerHTML=`<h3><b>${esc(ME.handle)}</b>@home</h3>`+[
+  ['name',esc(ME.name)],['role',esc(ME.role)],['location',esc(ME.loc)],['stack',esc(ME.stack)],['likes',esc(ME.likes)],
+  ['github',`<a href="${esc(ME.github)}">${esc(host(ME.github))}</a>`],['email',`<a href="mailto:${esc(ME.email)}">${esc(ME.email)}</a>`],
+  ['projects',PROJECTS.length+'개'],['games',GAMES.length+'개'],['notes',NOTES.length+'개']
+].map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')+
+`<div class="sw">${['#0a0e0b','#ff5f57','#6ef59a','#febc2e','#72d0ff','#ff7ac6','#d5e1d1'].map(c=>`<i style="background:${c}"></i>`).join('')}</div>`;
+
+$('#pList').innerHTML=PROJECTS.map(p=>`
+  <div class="row">
+    <span class="perm">drwxr-xr-x</span>
+    <time>${p.date}</time>
+    <div><h3>${esc(p.name)}/ <small class="${p.status==='live'?'live':'wip'}">● ${p.status==='live'?'배포 중':'작업 중'}</small></h3>
+      <p>${esc(p.desc)}</p><div class="tags">${p.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div></div>
+    <a class="go" href="${esc(p.url)}" target="_blank" rel="noopener">open ↗</a>
+  </div>`).join('');
+
+const thumb=(g,i)=>{const cells=[];for(let y=0;y<7;y++)for(let x=0;x<20;x++){const v=(x*7+y*13+i*5)%11;if(v<3)cells.push(`<rect x="${x*16+2}" y="${y*16+12}" width="13" height="13" rx="2" fill="${g.hue}" opacity="${.15+v*.25}"/>`)}
+  return `<svg viewBox="0 0 324 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${cells.join('')}
+  <text x="16" y="128" fill="${g.hue}" font-family="JetBrains Mono,monospace" font-weight="800" font-size="22">&gt; ${esc(g.name)}</text></svg>`};
+$('#gList').innerHTML=GAMES.map((g,i)=>`
+  <article class="card"><div class="thumb">${thumb(g,i)}</div>
+    <div class="body"><h3>${esc(g.name)}</h3><div class="meta">${esc(g.genre)} · ${esc(g.made)}</div>
+      <p>${esc(g.desc)}</p><div><a class="go" href="${esc(g.url)}" target="_blank" rel="noopener">▶ 플레이하기</a></div></div>
+  </article>`).join('');
+
+const renderNotes=q=>{q=(q||'').trim().toLowerCase();
+  const list=NOTES.filter(n=>!q||(n.title+' '+n.tags.join(' ')+' '+n.body.join(' ')).toLowerCase().includes(q));
+  $('#nList').innerHTML=list.length?list.map(n=>`
+    <details id="note-${n.id}"><summary><time>${n.date}</time><strong>${esc(n.title)}</strong></summary>
+      <div class="nb"><div class="tags">${n.tags.map(t=>`<span>#${esc(t)}</span>`).join('')}</div>${n.body.map(b=>`<p>${b}</p>`).join('')}</div></details>`).join('')
+    :`<div class="empty">grep: "${esc(q)}" — 일치하는 글이 없어요</div>`};
+renderNotes();
+$('#q').addEventListener('input',e=>renderNotes(e.target.value));
+
+/* terminal */
+const log=$('#log'),cin=$('#cin'),scr=$('#screen');
+const PS=`<span class="pr">${esc(ME.handle)}@home:<i>~</i>$</span> `;
+const out=h=>{const d=document.createElement('div');d.className='ln';d.innerHTML=h;log.appendChild(d);scr.scrollTop=scr.scrollHeight};
+const DIRS={projects:PROJECTS,games:GAMES,notes:NOTES};
+const findItem=n=>{n=(n||'').toLowerCase().replace(/\/$/,'');return [...PROJECTS,...GAMES].find(x=>x.id.toLowerCase()===n||x.name.toLowerCase()===n)};
+const C={
+  help:()=>[`<span class="t-g">사용할 수 있는 명령어</span>`,
+    `  <span class="t-d">whoami</span>            나에 대해`,`  <span class="t-d">ls</span> [폴더]          목록 보기 (projects, games, notes)`,
+    `  <span class="t-d">cd</span> &lt;폴더&gt;          해당 섹션으로 이동`,`  <span class="t-d">open</span> &lt;이름&gt;       프로젝트·게임 링크 열기`,
+    `  <span class="t-d">cat</span> &lt;글&gt;          노트 읽기`,`  <span class="t-d">date</span> · <span class="t-d">clear</span>`].join('\n'),
+  whoami:()=>`<span class="t-p">${esc(ME.name)}</span> — ${esc(ME.role)}\n<span class="t-dim">${esc(ME.loc)} · ${esc(ME.stack)}</span>`,
+  ls:a=>{if(!a)return Object.keys(DIRS).map(k=>`<span class="t-d">${k}/</span>`).join('   ')+'   <span class="t-d">about/</span>';
+    const k=a.replace(/\/$/,'').replace(/^~\//,'');const L=DIRS[k];
+    if(!L)return `ls: '${esc(a)}' 에 접근할 수 없음: 그런 폴더가 없어요`;
+    return L.map(x=>k==='notes'?`<span class="t-dim">${x.date}</span>  ${esc(x.id)}.md`:`<span class="t-d">${esc(x.id)}</span>  <span class="t-dim">${esc(x.desc)}</span>`).join('\n')+
+      `\n<span class="t-dim">→ ${k==='notes'?'cat &lt;이름&gt;':'open &lt;이름&gt;'} 으로 열어보세요</span>`},
+  cd:a=>{const k=(a||'').replace(/\/$/,'').replace(/^~\//,'');if(!a||k==='~'){scrollTo({top:0});return ''}
+    if(['about','projects','games','notes'].includes(k)){location.hash=k;return `<span class="t-dim">→ ~/${k} 로 이동</span>`}
+    return `cd: 그런 폴더가 없어요: ${esc(a)}`},
+  open:a=>{const x=findItem(a);if(!x)return a?`open: '${esc(a)}' 을(를) 찾을 수 없어요. <span class="t-dim">ls projects</span> 로 확인해 보세요`:'사용법: open &lt;이름&gt;';
+    return `<span class="t-g">✓</span> ${esc(x.name)} → <a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.url)}</a> <span class="t-dim">(클릭해서 열기)</span>`},
+  cat:a=>{const n=NOTES.find(x=>x.id===(a||'').replace(/\.md$/,''));if(!n)return a?`cat: ${esc(a)}: 그런 파일이 없어요`:'사용법: cat &lt;글이름&gt; (ls notes 참고)';
+    $('#q').value='';renderNotes();const d=document.getElementById('note-'+n.id);if(d)d.open=true;
+    return `<span class="t-p"># ${esc(n.title)}</span>\n`+n.body.map(b=>b.replace(/<\/?code>/g,'`')).join('\n')},
+  date:()=>new Date().toLocaleString('ko-KR'),
+  clear:()=>{log.innerHTML='';return null},
+  sudo:()=>`<span class="t-p">${esc(ME.handle)}</span> is not in the sudoers file. 이 사건은 보고됩니다 😉`
+};
+const hist=[];let hi=0;
+const run=raw=>{const s=raw.trim();out(PS+esc(s));if(!s)return;hist.push(s);hi=hist.length;
+  const [c,...a]=s.split(/\s+/);const f=C[c.toLowerCase()];
+  const r=f?f(a.join(' ')):`zsh: command not found: ${esc(c)}  <span class="t-dim">— help 를 입력해 보세요</span>`;
+  if(r)out(r)};
+cin.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){run(cin.value);cin.value=''}
+  else if(e.key==='ArrowUp'&&hist.length){hi=Math.max(0,hi-1);cin.value=hist[hi];e.preventDefault()}
+  else if(e.key==='ArrowDown'){hi=Math.min(hist.length,hi+1);cin.value=hist[hi]||''}
+  else if(e.key==='Tab'){e.preventDefault();const p=cin.value.split(' ');const last=p.pop();
+    const pool=[...Object.keys(C),...Object.keys(DIRS),'about',...PROJECTS.map(x=>x.id),...GAMES.map(x=>x.id),...NOTES.map(x=>x.id)];
+    const m=pool.filter(w=>w.startsWith(last));if(m.length===1){p.push(m[0]);cin.value=p.join(' ')+' '}}
+});
+scr.addEventListener('click',()=>{if(!getSelection().toString())cin.focus({preventScroll:true})});
+$('#chips').addEventListener('click',e=>{const b=e.target.closest('button');if(b){run(b.dataset.c);cin.focus({preventScroll:true})}});
+
+/* boot: one purposeful motion — types the first command */
+const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+out(`<span class="t-dim">Last login: ${new Date().toLocaleDateString('ko-KR')} on ttys001 — 환영해요!</span>`);
+const boot=['whoami','ls'];
+if(still){boot.forEach(run)}else{
+  let bi=0;const typeCmd=()=>{if(bi>=boot.length){out('<span class="t-dim">help 를 입력하면 모든 명령어를 볼 수 있어요</span>');return}
+    const w=boot[bi++];let k=0;const t=setInterval(()=>{cin.value=w.slice(0,++k);if(k>=w.length){clearInterval(t);setTimeout(()=>{run(w);cin.value='';setTimeout(typeCmd,500)},250)}},90)};
+  setTimeout(typeCmd,500)}
+}
+</script>
+</body>
+</html>
